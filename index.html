@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding · 101</title>
+<meta name="description" content="A practical intro to vibe coding — building software with AI, on a real toolkit.">
+
+<style>
+  :root{
+    --black:#0a0a0a;
+    --white:#ffffff;
+    --off:#fafafa;
+    --g900:#111111;
+    --g600:#5c5c5c;
+    --g400:#8c8c8c;
+    --g200:#e4e4e4;
+    --g100:#efefef;
+    --line:#dcdcdc;
+    --nav-h:76px;
+    --font-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Consolas', 'Menlo', 'Courier New', monospace;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  section{scroll-margin-top:var(--nav-h);}
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;}
+
+  .mono{font-family:var(--font-mono);}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--g600);
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    margin-bottom:1.2rem;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    background:var(--black);
+    display:inline-block;
+    border-radius:50%;
+  }
+
+  .wrap{
+    max-width:1280px;
+    margin:0 auto;
+    padding:0 6vw;
+  }
+
+  /* ===== progress bar ===== */
+  #progress{
+    position:fixed; top:0; left:0; height:2px; width:0%;
+    background:var(--black); z-index:1000; transition:width .08s linear;
+  }
+
+  /* ===== nav ===== */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:900;
+    height:var(--nav-h);
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    height:100%;
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:1280px; margin:0 auto; padding:0 6vw;
+  }
+  .brand{
+    display:flex; align-items:center; gap:.7rem;
+    font-family:var(--font-mono);
+    font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+  }
+  .brand .mark{
+    width:30px;height:30px;background:var(--black);color:var(--white);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700; font-size:.68rem; letter-spacing:0;
+    flex-shrink:0;
+  }
+  .navlinks{display:flex; align-items:center; gap:2.6rem;}
+  .navlinks a{
+    font-family:var(--font-mono);
+    font-size:.75rem; letter-spacing:.12em; text-transform:uppercase;
+    position:relative; padding:.3rem 0;
+  }
+  .navlinks a::after{
+    content:""; position:absolute; left:0; bottom:0; height:1px; width:0;
+    background:var(--black); transition:width .25s ease;
+  }
+  .navlinks a:hover::after, .navlinks a.active::after{width:100%;}
+  .navlinks a.active{font-weight:700;}
+
+  .burger{display:none; flex-direction:column; gap:5px; width:26px;}
+  .burger span{height:1px; background:var(--black); width:100%;}
+
+  /* ===== corner marks ===== */
+  .crosshair{
+    position:absolute; width:16px; height:16px; pointer-events:none; opacity:.5;
+  }
+  .crosshair::before,.crosshair::after{content:"";position:absolute;background:var(--black);}
+  .crosshair::before{width:100%;height:1px;top:50%;left:0;}
+  .crosshair::after{width:1px;height:100%;left:50%;top:0;}
+  .c-tl{top:24px;left:24px;} .c-tr{top:24px;right:24px;}
+  .c-bl{bottom:24px;left:24px;} .c-br{bottom:24px;right:24px;}
+
+  /* ===== hero ===== */
+  #top{
+    position:relative;
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-top:var(--nav-h);
+    background:
+      radial-gradient(circle, var(--g200) 1px, transparent 1px);
+    background-size:28px 28px;
+    background-position:center;
+  }
+  .hero-inner{max-width:1280px;margin:0 auto;padding:0 6vw;width:100%;}
+  .hero-eyebrow{
+    font-family:var(--font-mono);font-size:.78rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--g600);margin-bottom:2rem;
+    display:flex;gap:1.2rem;flex-wrap:wrap;
+  }
+  h1.display{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:clamp(2.6rem, 8vw, 6.4rem);
+    line-height:.98;
+    letter-spacing:-.02em;
+  }
+  h1.display .outline{
+    color:transparent;
+    -webkit-text-stroke:1.5px var(--black);
+  }
+  .hero-sub{
+    max-width:560px; margin-top:2.2rem;
+    font-size:1.05rem; color:var(--g600);
+  }
+  .hero-meta{
+    margin-top:4rem; display:flex; align-items:center; justify-content:space-between;
+    border-top:1px solid var(--line); padding-top:1.4rem;
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; color:var(--g400);
+    text-transform:uppercase;
+  }
+  .scrollcue{display:flex;align-items:center;gap:.5rem;}
+  .scrollcue .arrow{display:inline-block; animation:bob 1.6s infinite ease-in-out;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+
+  /* ===== section header pattern ===== */
+  .section-pad{padding:7rem 0;}
+  .section-pad.alt{background:var(--off);}
+  .sec-head{max-width:760px; margin-bottom:3.5rem;}
+  .sec-head h2{
+    font-family:var(--font-display); font-weight:800;
+    font-size:clamp(1.9rem, 4.2vw, 3.2rem); letter-spacing:-.01em; margin-bottom:1.1rem;
+  }
+  .sec-head p{color:var(--g600); font-size:1.02rem; max-width:620px;}
+  .divider{border:none;border-top:1px solid var(--line); margin:0 0 3.5rem;}
+
+  /* reveal */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ===== accordion (About) ===== */
+  .accordion{border-top:1px solid var(--line);}
+  .acc-item{border-bottom:1px solid var(--line);}
+  .acc-trigger{
+    width:100%; display:flex; align-items:center; gap:1.6rem;
+    padding:1.8rem 0; text-align:left;
+  }
+  .acc-num{font-family:var(--font-mono); font-size:.85rem; color:var(--g400); flex-shrink:0; width:2.2rem;}
+  .acc-title{
+    font-family:var(--font-display); font-weight:700; font-size:1.35rem; flex:1;
+    transition:opacity .2s ease;
+  }
+  .acc-trigger:hover .acc-title{opacity:.55;}
+  .acc-icon{font-family:var(--font-mono); font-size:1.1rem; flex-shrink:0; transition:transform .3s ease;}
+  .acc-item.open .acc-icon{transform:rotate(45deg);}
+  .acc-panel{
+    max-height:0; overflow:hidden; transition:max-height .4s ease;
+  }
+  .acc-panel-inner{padding:0 0 2.4rem 3.8rem; color:var(--g600); font-size:.98rem; max-width:760px;}
+  .acc-panel-inner .lead{color:var(--black); margin-bottom:1.2rem;}
+
+  .trio{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--line); margin-top:1.5rem;}
+  .trio > div{padding:1.4rem 1.5rem; border-left:1px solid var(--line);}
+  .trio > div:first-child{border-left:none;}
+  .trio h4{font-family:var(--font-mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--g400); margin-bottom:.5rem;}
+  .trio strong{display:block; font-size:1rem; margin-bottom:.4rem;}
+  .trio p{font-size:.88rem; color:var(--g600);}
+
+  /* workspace diagram */
+  .workspace{
+    display:grid;
+    grid-template-columns:56px 1fr 200px;
+    grid-template-rows:1fr 64px;
+    grid-template-areas:"sb ed ch" "sb tm ch";
+    height:280px;
+    border:1px solid var(--black);
+    margin-top:1.6rem;
+    background:var(--white);
+  }
+  .wz{
+    border:1px solid var(--g200); display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--g400); text-align:center; padding:.5rem; transition:background .2s ease, color .2s ease;
+  }
+  .wz:hover, .wz.active{background:var(--black); color:var(--white); border-color:var(--black);}
+  .wz-sb{grid-area:sb;} .wz-ed{grid-area:ed;} .wz-tm{grid-area:tm;} .wz-ch{grid-area:ch;}
+  .wz-desc{
+    margin-top:1.2rem; padding:1.4rem 1.6rem; background:var(--off); border:1px solid var(--line);
+  }
+  .wz-desc h4{font-size:1.05rem; margin-bottom:.4rem; font-family:var(--font-display);}
+  .wz-desc p{font-size:.92rem; color:var(--g600);}
+
+  /* pricing */
+  .pricing{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); margin-top:1.6rem;}
+  .price-card{background:var(--white); padding:1.8rem 1.5rem; position:relative;}
+  .price-card.rec{background:var(--black); color:var(--white);}
+  .price-card .badge{
+    position:absolute; top:-11px; left:1.5rem; background:var(--black); color:var(--white);
+    font-family:var(--font-mono); font-size:.62rem; letter-spacing:.1em; padding:.25rem .6rem;
+  }
+  .price-card .amount{font-family:var(--font-display); font-weight:800; font-size:1.7rem;}
+  .price-card .tag{font-family:var(--font-mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--g400); margin:.5rem 0 1rem;}
+  .price-card.rec .tag{color:#bbb;}
+  .price-card .name{font-weight:700; margin-bottom:.6rem;}
+  .price-card .desc{font-size:.85rem; color:var(--g600);}
+  .price-card.rec .desc{color:#ccc;}
+
+  /* two-col invert cards (closed/open, frontend/backend) */
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); margin-top:1.6rem;}
+  .duo-card{background:var(--off); padding:2rem;}
+  .duo-card.dark{background:var(--black); color:var(--white);}
+  .duo-card .tag{font-family:var(--font-mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--g400); margin-bottom:.6rem;}
+  .duo-card.dark .tag{color:#999;}
+  .duo-card h4{font-family:var(--font-display); font-size:1.15rem; margin-bottom:.7rem;}
+  .duo-card p{font-size:.9rem; color:var(--g600);}
+  .duo-card.dark p{color:#ccc;}
+  .pill-row{display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem;}
+  .pill{font-family:var(--font-mono); font-size:.7rem; border:1px solid var(--g200); padding:.3rem .7rem;}
+  .duo-card.dark .pill{border-color:#444;}
+
+  /* console mock */
+  .console{
+    background:var(--black); color:var(--white); font-family:var(--font-mono); font-size:.8rem;
+    padding:1.2rem 1.4rem; margin-top:1.4rem; border:1px solid var(--black);
+  }
+  .console .err{font-weight:700; font-style:italic; border-bottom:1px dashed #555; padding-bottom:.8rem; margin-bottom:.5rem;}
+  .console .muted{color:#888;}
+
+  .steps3{margin-top:1.6rem;}
+  .steps3 li{display:flex; gap:1.4rem; padding:1.1rem 0; border-top:1px solid var(--line);}
+  .steps3 li:last-child{border-bottom:1px solid var(--line);}
+  .steps3 .n{font-family:var(--font-mono); color:var(--g400); flex-shrink:0;}
+
+  /* ===== presentation stepper ===== */
+  .stepper-tabs{display:flex; border:1px solid var(--black); margin-top:1.6rem; flex-wrap:wrap;}
+  .stepper-tabs button{
+    flex:1; min-width:150px; padding:1.2rem 1.4rem; text-align:left; border-right:1px solid var(--black);
+    transition:background .2s ease, color .2s ease;
+  }
+  .stepper-tabs button:last-child{border-right:none;}
+  .stepper-tabs button .n{font-family:var(--font-mono); font-size:.78rem; color:var(--g400); display:block; margin-bottom:.3rem;}
+  .stepper-tabs button .t{font-weight:700; font-size:.92rem;}
+  .stepper-tabs button.active{background:var(--black); color:var(--white);}
+  .stepper-tabs button.active .n{color:#999;}
+
+  .step-panel{display:none; border:1px solid var(--black); border-top:none; padding:2.4rem; }
+  .step-panel.active{display:block;}
+  .step-panel h3{font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;}
+  .step-panel p{color:var(--g600); max-width:640px; margin-bottom:1.2rem;}
+  .step-panel ol{margin-left:0; max-width:640px;}
+  .step-panel ol li{position:relative; padding-left:1.6rem; margin-bottom:.6rem; color:var(--g600);}
+  .step-panel ol li::before{content:"—"; position:absolute; left:0;}
+
+  .prompt-box{
+    background:var(--black); color:var(--white); font-family:var(--font-mono); font-size:.86rem;
+    padding:1.4rem 1.6rem; margin-top:1rem; position:relative; line-height:1.6;
+  }
+  .prompt-box .label{font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:#999; margin-bottom:.8rem; display:block;}
+  .copy-btn{
+    position:absolute; top:1rem; right:1rem; border:1px solid #555; color:#ccc;
+    font-family:var(--font-mono); font-size:.65rem; letter-spacing:.06em; text-transform:uppercase;
+    padding:.35rem .7rem; transition:all .2s ease;
+  }
+  .copy-btn:hover{background:var(--white); color:var(--black); border-color:var(--white);}
+
+  .deck-link{
+    display:inline-flex; align-items:center; gap:.8rem; margin-top:2.2rem;
+    border:1px solid var(--black); padding:1rem 1.6rem;
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase;
+    transition:background .2s ease, color .2s ease;
+  }
+  .deck-link:hover{background:var(--black); color:var(--white);}
+
+  /* ===== links grid ===== */
+  .group-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--g400); margin:2.6rem 0 1.2rem;
+  }
+  .group-label:first-of-type{margin-top:0;}
+  .link-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line);}
+  .link-card{
+    background:var(--white); padding:1.8rem; display:flex; flex-direction:column; justify-content:space-between;
+    min-height:150px; transition:background .2s ease, color .2s ease;
+  }
+  .link-card:hover{background:var(--black); color:var(--white);}
+  .link-card .top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .link-card .name{font-family:var(--font-display); font-weight:700; font-size:1.15rem;}
+  .link-card .go{font-family:var(--font-mono); font-size:.9rem; transition:transform .2s ease;}
+  .link-card:hover .go{transform:translate(3px,-3px);}
+  .link-card .desc{font-size:.85rem; color:var(--g600); margin-top:1rem;}
+  .link-card:hover .desc{color:#ccc;}
+
+  /* ===== hand-drawn artwork ===== */
+  .sketch{fill:none; stroke:var(--black); stroke-width:3; stroke-linecap:round; stroke-linejoin:round;}
+  .hero-row{display:flex; align-items:center; justify-content:space-between; gap:3rem; flex-wrap:wrap;}
+  .hero-text{flex:1; min-width:320px;}
+  .hero-visual{flex-shrink:0; width:min(340px, 32vw); min-width:200px;}
+  .acc-art{width:38px; height:38px; flex-shrink:0;}
+  .rocket-art{width:84px; display:block; margin:0 0 1.6rem;}
+  .card-icon{width:30px; height:30px; margin-bottom:1.1rem;}
+  .link-card:hover .sketch{stroke:var(--white);}
+  @media (max-width:860px){
+    .hero-visual{width:180px; margin:2.4rem auto 0;}
+    .hero-row{justify-content:center; text-align:center;}
+    .hero-text{text-align:left;}
+  }
+
+  /* footer */
+  footer{border-top:1px solid var(--line); padding:3rem 0;}
+  .foot-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;}
+  .foot-row .mono{font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--g400);}
+  .back-top{font-family:var(--font-mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; border-bottom:1px solid var(--black); padding-bottom:2px;}
+
+  /* ===== mobile ===== */
+  @media (max-width:860px){
+    .navlinks{
+      position:fixed; top:var(--nav-h); left:0; right:0; background:var(--white);
+      flex-direction:column; align-items:flex-start; gap:0; border-bottom:1px solid var(--line);
+      transform:translateY(-110%); transition:transform .3s ease; padding:0 6vw;
+    }
+    .navlinks.open{transform:translateY(0);}
+    .navlinks a{width:100%; padding:1.1rem 0; border-bottom:1px solid var(--line);}
+    .burger{display:flex;}
+    .trio{grid-template-columns:1fr;}
+    .trio > div{border-left:none; border-top:1px solid var(--line);}
+    .trio > div:first-child{border-top:none;}
+    .pricing{grid-template-columns:1fr 1fr;}
+    .duo{grid-template-columns:1fr;}
+    .workspace{grid-template-columns:44px 1fr 130px; height:240px;}
+    .stepper-tabs{flex-direction:column;}
+    .stepper-tabs button{border-right:none; border-bottom:1px solid var(--black);}
+    .stepper-tabs button:last-child{border-bottom:none;}
+    .link-grid{grid-template-columns:1fr;}
+    .hero-meta{flex-direction:column; align-items:flex-start; gap:.8rem;}
+  }
+  @media (max-width:520px){
+    .pricing{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <nav>
+    <a href="#top" class="brand"><span class="mark">VC</span> Vibe Coding · 101</a>
+    <ul class="navlinks" id="navlinks">
+      <li><a href="#about" data-nav>About</a></li>
+      <li><a href="#presentation" data-nav>Presentation</a></li>
+      <li><a href="#links" data-nav>Relevant Links</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="top">
+  <span class="crosshair c-tl"></span>
+  <span class="crosshair c-tr"></span>
+  <span class="crosshair c-bl"></span>
+  <span class="crosshair c-br"></span>
+
+  <div class="hero-inner">
+    <div class="hero-row">
+      <div class="hero-text">
+        <div class="hero-eyebrow">
+          <span>Vibe Coding · 101</span><span>—</span><span>A practical intro, for students</span>
+        </div>
+        <h1 class="display">Build with a<br><span class="outline">real toolkit.</span></h1>
+        <p class="hero-sub">Why serious vibe coding starts with a real editor on your own machine — and the freedom that gives you. A short, hands-on guide to working with AI and code, made to be read once and used often.</p>
+      </div>
+
+      <svg class="sketch hero-visual" viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="95" y="45" width="205" height="145" rx="12"/>
+        <line x1="95" y1="78" x2="300" y2="78"/>
+        <polyline points="168,100 142,140 168,180"/>
+        <polyline points="248,100 274,140 248,180"/>
+        <line x1="192" y1="185" x2="222" y2="95"/>
+        <path d="M70,190 L330,190 L352,232 Q352,240 344,240 L56,240 Q48,240 48,232 Z"/>
+        <rect x="175" y="207" width="90" height="14" rx="6"/>
+        <path d="M48,236 C30,236 22,248 34,254 C44,259 50,247 38,244 C30,242 32,252 42,252"/>
+        <line x1="345" y1="20" x2="345" y2="62"/>
+        <line x1="324" y1="41" x2="366" y2="41"/>
+        <line x1="330" y1="26" x2="360" y2="56"/>
+        <line x1="360" y1="26" x2="330" y2="56"/>
+        <path d="M366,41 C380,37 388,46 378,53 C371,58 372,46 366,41"/>
+        <path d="M332,58 Q305,78 292,98" stroke-dasharray="3 7"/>
+      </svg>
+    </div>
+
+    <div class="hero-meta">
+      <span>Working smart with AI &amp; code</span>
+      <span class="scrollcue">Scroll <span class="arrow">↓</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section-pad">
+  <div class="wrap">
+    <div class="eyebrow">01 — About</div>
+    <div class="sec-head reveal">
+      <h2>What is vibe coding, really?</h2>
+      <p>Vibe coding means describing what you want in plain language and letting an AI write the code — while you stay the one who decides what gets built, checks every change, and understands why it works. It's not about typing every line yourself. It's about steering clearly, and staying honest about what you actually understand.</p>
+    </div>
+
+    <div class="accordion reveal">
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">01</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><rect x="14" y="14" width="72" height="48" rx="6"/><line x1="40" y1="62" x2="40" y2="78"/><line x1="60" y1="62" x2="60" y2="78"/><line x1="28" y1="82" x2="72" y2="82"/><circle cx="76" cy="26" r="2.5"/></svg>
+          <span class="acc-title">Why work on your own computer</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">Browser tools like Replit are fine to start — but local software like VS Code is the professional standard, for three reasons.</p>
+            <div class="trio">
+              <div><h4>01 · Ownership</h4><strong>Your code, your disk</strong><p>It doesn't live in a third party's cloud that can shut down or raise prices. It's your digital asset, fully under your control.</p></div>
+              <div><h4>02 · Speed &amp; privacy</h4><strong>Nothing waits on the internet</strong><p>The software runs locally — typing and searching are instant, and sensitive ideas never have to leave your machine.</p></div>
+              <div><h4>03 · Version control</h4><strong>A full history of every change</strong><p>Git is like "Google Docs for code," only smarter. Broke something? One click rolls back to yesterday's working version.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">02</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><circle cx="32" cy="34" r="16"/><line x1="44" y1="46" x2="80" y2="82"/><line x1="66" y1="68" x2="74" y2="60"/><line x1="72" y1="74" x2="80" y2="66"/></svg>
+          <span class="acc-title">Freedom to choose your AI</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">The AI leader changes every few months. Your tools shouldn't lock you into just one of them.</p>
+            <div class="duo">
+              <div class="duo-card">
+                <div class="tag">Closed platform</div>
+                <h4>One AI, and you're a hostage</h4>
+                <p>Build inside a platform wired to a single model, and you're tied to that one company's pricing, limits, and roadmap.</p>
+              </div>
+              <div class="duo-card dark">
+                <div class="tag">VS Code</div>
+                <h4>Open through extensions</h4>
+                <p>Connect your workspace to any model through a lightweight extension. A better model ships tomorrow? Just swap the API key.</p>
+                <div class="pill-row">
+                  <span class="pill">Claude Dev</span><span class="pill">Continue</span><span class="pill">Cursor</span><span class="pill">Roo Code</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">03</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><rect x="12" y="20" width="76" height="60" rx="6"/><line x1="12" y1="34" x2="88" y2="34"/><circle cx="21" cy="27" r="2"/><circle cx="29" cy="27" r="2"/><circle cx="37" cy="27" r="2"/><polyline points="42,50 42,68 52,64 58,74 62,72 56,62 66,60 42,50"/></svg>
+          <span class="acc-title">A tour of the workspace</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">It looks busy at first — but it's really just four areas working together. Click each one.</p>
+            <div class="workspace">
+              <div class="wz wz-sb active" data-zone="sidebar">Sidebar</div>
+              <div class="wz wz-ed" data-zone="editor">Editor</div>
+              <div class="wz wz-tm" data-zone="terminal">Terminal</div>
+              <div class="wz wz-ch" data-zone="chat">AI Chat</div>
+            </div>
+            <div class="wz-desc" id="wz-desc">
+              <h4>Sidebar — left</h4>
+              <p>Your map of the project: browse every file, plus one-click access to Search, Git, Extensions, and Run &amp; Debug.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">04</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><path d="M14,38 L44,14 L86,52 L54,86 Z"/><circle cx="33" cy="34" r="6"/><path d="M27,27 C20,18 17,10 25,6"/></svg>
+          <span class="acc-title">What the AI engines cost</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">Because VS Code connects to any model, you choose how much to spend — from free, to a few dollars, to today's strongest.</p>
+            <div class="pricing">
+              <div class="price-card">
+                <div class="amount">Free</div>
+                <div class="tag">GitHub Copilot</div>
+                <div class="name">Older GPT-class model</div>
+                <div class="desc">Comes with any free GitHub account — the simplest way to switch it on.</div>
+              </div>
+              <div class="price-card">
+                <div class="amount">Free</div>
+                <div class="tag">GitHub Student</div>
+                <div class="name">Wider choice of models</div>
+                <div class="desc">Free for verified students. Usage caps apply — check your current limit.</div>
+              </div>
+              <div class="price-card">
+                <div class="amount">~$2</div>
+                <div class="tag">Pay-as-you-go</div>
+                <div class="name">DeepSeek</div>
+                <div class="desc">Top up credits yourself — a couple of dollars buys many hours of use.</div>
+              </div>
+              <div class="price-card rec">
+                <span class="badge">Recommended</span>
+                <div class="amount">$20/mo</div>
+                <div class="tag">Claude</div>
+                <div class="name">The current sweet spot</div>
+                <div class="desc">Best balance of quality and cost — strong on complex builds and simple edits alike.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">05</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><polyline points="14,86 34,86 34,64 54,64 54,42 74,42 74,20"/><polyline points="66,20 74,20 74,28"/></svg>
+          <span class="acc-title">Building your first project</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">The one habit that makes complex builds possible.</p>
+            <ul class="steps3">
+              <li><span class="n">01</span><span><strong>Open a new folder.</strong> Make an empty folder and open it in VS Code — that folder is your project.</span></li>
+              <li><span class="n">02</span><span><strong>Start with small requests.</strong> Ask the AI for one small, clear thing at a time, and check each result before moving on.</span></li>
+              <li><span class="n">03</span><span><strong>Split the big idea.</strong> A complex site or platform only comes together by breaking it into many small requests.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">06</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="58" rx="18" ry="24"/><circle cx="50" cy="26" r="9"/><path d="M43,20 C34,14 28,16 30,8"/><path d="M57,20 C66,14 72,16 70,8"/><line x1="32" y1="46" x2="18" y2="42"/><line x1="32" y1="58" x2="16" y2="58"/><line x1="32" y1="70" x2="18" y2="74"/><line x1="68" y1="46" x2="82" y2="42"/><line x1="68" y1="58" x2="84" y2="58"/><line x1="68" y1="70" x2="82" y2="74"/></svg>
+          <span class="acc-title">When something breaks</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">The browser already knows why it's broken — it just keeps the explanation hidden until you ask for it.</p>
+            <ul class="steps3">
+              <li><span class="n">01</span><span><strong>Press F12.</strong> Open developer tools and pick the Console tab — where the page reports what's wrong.</span></li>
+              <li><span class="n">02</span><span><strong>Find the error.</strong> It appears with a message and the exact file and line where it happened.</span></li>
+              <li><span class="n">03</span><span><strong>Copy it to Claude.</strong> Paste the error and ask it to fix the problem — that message is all the context it needs.</span></li>
+            </ul>
+            <div class="console">
+              <div class="muted">&gt; App started · waiting for data…</div>
+              <div class="err">✕ Uncaught TypeError: Cannot read properties of undefined (reading 'name')<br>at App.jsx:42:18</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">07</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><path d="M50,24 C36,16 22,18 14,25 L14,76 C22,69 36,67 50,75 C64,67 78,69 86,76 L86,25 C78,18 64,16 50,24 Z"/><line x1="50" y1="24" x2="50" y2="75"/><path d="M50,18 C54,10 50,6 44,10"/></svg>
+          <span class="acc-title">A few concepts worth knowing</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">Before you build something bigger, three terms come up again and again.</p>
+            <div class="trio">
+              <div><h4>HTML</h4><strong>The base layer of the web</strong><p>The simplest thing to build, with almost no setup. An <strong>API</strong> is how your app fetches data that's protected or paid for elsewhere.</p></div>
+              <div><h4>GitHub</h4><strong>Push, pull, fork</strong><p><em>git push</em> saves changes to the cloud. <em>git pull</em> brings down others' changes. A <em>fork</em> is your own copy of someone else's project.</p></div>
+              <div><h4>Vite</h4><strong>Your dev server</strong><p><code>npm run dev</code> runs a small server on your machine, so your site is live and refreshes automatically every time you save.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" data-acc>
+          <span class="acc-num">08</span>
+          <svg class="sketch acc-art" viewBox="0 0 100 100" aria-hidden="true"><path d="M26,66 A16,16 0 1,1 32,35 A21,21 0 0,1 70,31 A16,16 0 1,1 76,66 Z"/><path d="M42,50 A9,9 0 1,1 58,50"/><polyline points="58,46 58,50 62,50"/></svg>
+          <span class="acc-title">Building a platform without a backend</span>
+          <span class="acc-icon">+</span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-panel-inner">
+            <p class="lead">Traditionally, an app with real users meant two teams. Today, one of them comes ready-made.</p>
+            <div class="duo">
+              <div class="duo-card">
+                <div class="tag">Frontend</div>
+                <h4>What you build</h4>
+                <p>The part users see and touch — buttons, layout, graphs. You shape it together with the AI, then ask it to connect a button to your database.</p>
+              </div>
+              <div class="duo-card dark">
+                <div class="tag">Backend</div>
+                <h4>Handled for you</h4>
+                <p>Server, database, security, cloud — provided out of the box by BaaS platforms, wired up by the AI in a few lines of code.</p>
+                <div class="pill-row"><span class="pill">Supabase</span><span class="pill">Firebase</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PRESENTATION -->
+<section id="presentation" class="section-pad alt">
+  <div class="wrap">
+    <div class="eyebrow">02 — Presentation</div>
+    <div class="sec-head reveal">
+      <h2>From idea to a live link.</h2>
+      <p>From here it's hands-on — the exact steps, from signing up to putting a real site on the web with a link you can share.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="stepper-tabs" id="stepper-tabs">
+        <button class="active" data-step="1"><span class="n">Step 01</span><span class="t">Create your GitHub account</span></button>
+        <button data-step="2"><span class="n">Step 02</span><span class="t">Connect VS Code</span></button>
+        <button data-step="3"><span class="n">Step 03</span><span class="t">Ask for your first site</span></button>
+        <button data-step="4"><span class="n">Step 04</span><span class="t">Push it live</span></button>
+      </div>
+
+      <div class="step-panel active" data-panel="1">
+        <h3>Create your GitHub account</h3>
+        <p>GitHub is the home base for everything that follows — your account, your code, and your free AI access all start here.</p>
+        <ol>
+          <li>Sign up for a free account at github.com.</li>
+          <li>A student? Apply for GitHub Student — same account, with extra tools and a wider choice of AI models, for free.</li>
+        </ol>
+      </div>
+
+      <div class="step-panel" data-panel="2">
+        <h3>Open VS Code &amp; connect your account</h3>
+        <p>Launch VS Code and sign in with the GitHub account you just made. That link is what unlocks your AI assistant inside the editor.</p>
+        <ol>
+          <li>Open VS Code and find the Accounts menu.</li>
+          <li>Sign in with GitHub and approve in the browser.</li>
+          <li>You're connected — the AI panel is ready to use.</li>
+        </ol>
+      </div>
+
+      <div class="step-panel" data-panel="3">
+        <h3>Ask for your first site</h3>
+        <p>Type a plain-language request in the AI panel. Keep it simple — a basic HTML site is the perfect way to learn the rhythm of vibe coding.</p>
+        <div class="prompt-box">
+          <span class="label">You → Claude</span>
+          <span id="prompt-1">Create a simple HTML website for a personal recipe page. One page, a title, a short intro, and a list of three favorite recipes. Keep the code plain HTML and CSS so it's easy to read.</span>
+          <button class="copy-btn" data-copy="prompt-1">Copy</button>
+        </div>
+        <p style="margin-top:1rem;">Claude writes the files and runs any setup for you. Open the preview to see it live — then ask for one small change at a time to keep going.</p>
+      </div>
+
+      <div class="step-panel" data-panel="4">
+        <svg class="sketch rocket-art" viewBox="0 0 120 160" aria-hidden="true"><path d="M60,8 C82,30 90,62 84,98 L36,98 C30,62 38,30 60,8 Z"/><circle cx="60" cy="52" r="11"/><path d="M36,98 L16,126 L36,114 Z"/><path d="M84,98 L104,126 L84,114 Z"/><path d="M50,98 C50,114 42,124 48,140 C54,130 57,122 60,140 C63,122 66,130 72,140 C78,124 70,114 70,98 Z"/><path d="M74,132 C86,128 92,138 82,142 C75,145 76,136 82,135"/></svg>
+        <h3>Push it to GitHub &amp; go live</h3>
+        <p>Once you're happy with it, one more prompt saves your code to GitHub and publishes it to a real web address you can share.</p>
+        <div class="prompt-box">
+          <span class="label">You → Claude</span>
+          <span id="prompt-2">Push this project to a new GitHub repository, then deploy it so it's available online with a public link I can share.</span>
+          <button class="copy-btn" data-copy="prompt-2">Copy</button>
+        </div>
+        <p style="margin-top:1rem;">Your code now lives safely on GitHub and on the web. Every future change can be pushed the same way — saved and published in one step.</p>
+      </div>
+
+      <a class="deck-link" href="Presentaion/Vibe Coding — Why VS Code.pdf" target="_blank" rel="noopener">
+        View the full slide deck (PDF) ↗
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- LINKS -->
+<section id="links" class="section-pad">
+  <div class="wrap">
+    <div class="eyebrow">03 — Relevant Links</div>
+    <div class="sec-head reveal">
+      <h2>Tools worth knowing.</h2>
+      <p>A handful of services do the heavy lifting as your project grows — most with a free tier to start. And a few platforms let AI build the whole app for you, start to finish.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="group-label">The toolkit</div>
+      <div class="link-grid">
+        <a class="link-card" href="https://git-scm.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><line x1="15" y1="8" x2="15" y2="52"/><circle cx="15" cy="14" r="5"/><circle cx="15" cy="46" r="5"/><circle cx="44" cy="30" r="5"/><path d="M15,25 C15,32 18,30 30,30 C36,30 38,30 39,30"/></svg>
+          <div class="top"><span class="name">Git</span><span class="go">↗</span></div>
+          <p class="desc">Version control — a full history of every change to your code, so nothing is ever truly lost.</p>
+        </a>
+        <a class="link-card" href="https://vercel.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><path d="M30,10 L54,48 L6,48 Z"/></svg>
+          <div class="top"><span class="name">Vercel</span><span class="go">↗</span></div>
+          <p class="desc">Hosting — publish your site to the web in a click, with a real, shareable URL.</p>
+        </a>
+        <a class="link-card" href="https://www.cloudflare.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><path d="M16,42 A10,10 0 1,1 20,22 A13,13 0 0,1 43,20 A10,10 0 1,1 46,42 Z"/></svg>
+          <div class="top"><span class="name">Cloudflare</span><span class="go">↗</span></div>
+          <p class="desc">Speed &amp; security — a fast, protective layer that sits in front of your site.</p>
+        </a>
+        <a class="link-card" href="https://clerk.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><circle cx="20" cy="20" r="10"/><line x1="27" y1="27" x2="48" y2="48"/><line x1="39" y1="39" x2="45" y2="33"/></svg>
+          <div class="top"><span class="name">Clerk</span><span class="go">↗</span></div>
+          <p class="desc">Accounts — sign-up and login, wired up for you without building auth yourself.</p>
+        </a>
+        <a class="link-card" href="https://posthog.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><line x1="8" y1="46" x2="52" y2="46"/><line x1="15" y1="46" x2="15" y2="28"/><line x1="30" y1="46" x2="30" y2="14"/><line x1="45" y1="46" x2="45" y2="34"/></svg>
+          <div class="top"><span class="name">PostHog</span><span class="go">↗</span></div>
+          <p class="desc">Analytics — see how people actually use what you've built.</p>
+        </a>
+      </div>
+
+      <div class="group-label">Lead with AI</div>
+      <div class="link-grid">
+        <a class="link-card" href="https://base44.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><line x1="30" y1="8" x2="30" y2="38"/><line x1="15" y1="23" x2="45" y2="23"/><line x1="19" y1="12" x2="41" y2="34"/><line x1="41" y1="12" x2="19" y2="34"/></svg>
+          <div class="top"><span class="name">Base44</span><span class="go">↗</span></div>
+          <p class="desc">Describe an app in plain language and get a full working product back — database included.</p>
+        </a>
+        <a class="link-card" href="https://aistudio.google.com" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><path d="M30,8 L48,24 L30,50 L12,24 Z"/><line x1="12" y1="24" x2="48" y2="24"/></svg>
+          <div class="top"><span class="name">Google AI Studio</span><span class="go">↗</span></div>
+          <p class="desc">Google's studio for building and testing apps directly with its Gemini models.</p>
+        </a>
+        <a class="link-card" href="https://lovable.dev" target="_blank" rel="noopener">
+          <svg class="sketch card-icon" viewBox="0 0 60 60" aria-hidden="true"><path d="M30,46 C10,32 8,16 20,10 C27,6 30,13 30,13 C30,13 33,6 40,10 C52,16 50,32 30,46 Z"/></svg>
+          <div class="top"><span class="name">Lovable</span><span class="go">↗</span></div>
+          <p class="desc">An AI teammate that turns a prompt into a deployed, working web app.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <span class="mono">Vibe Coding · 101</span>
+    <a href="#top" class="back-top">Back to top ↑</a>
+    <span class="mono">Made for students learning to build</span>
+  </div>
+</footer>
+
+<script>
+  // progress bar
+  const progress = document.getElementById('progress');
+  function updateProgress(){
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', updateProgress, {passive:true});
+  updateProgress();
+
+  // active nav link
+  const navLinks = document.querySelectorAll('[data-nav]');
+  const sections = ['about','presentation','links'].map(id => document.getElementById(id));
+  const navObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        navLinks.forEach(l=>l.classList.remove('active'));
+        const match = document.querySelector('[data-nav][href="#'+entry.target.id+'"]');
+        if(match) match.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-40% 0px -55% 0px'});
+  sections.forEach(s=> s && navObserver.observe(s));
+
+  // mobile menu
+  const burger = document.getElementById('burger');
+  const navlinksEl = document.getElementById('navlinks');
+  burger.addEventListener('click', ()=> navlinksEl.classList.toggle('open'));
+  navLinks.forEach(l=> l.addEventListener('click', ()=> navlinksEl.classList.remove('open')));
+
+  // reveal on scroll
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){ entry.target.classList.add('in'); }
+    });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=> revealObserver.observe(el));
+
+  // accordion
+  document.querySelectorAll('[data-acc]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const item = btn.closest('.acc-item');
+      const panel = item.querySelector('.acc-panel');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.acc-item.open').forEach(o=>{
+        o.classList.remove('open');
+        o.querySelector('.acc-panel').style.maxHeight = null;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // workspace hotspots
+  const wzDesc = {
+    sidebar:{title:'Sidebar — left', body:"Your map of the project: browse every file, plus one-click access to Search, Git, Extensions, and Run & Debug."},
+    editor:{title:'Editor — center', body:'The main stage where you read and write code. Open several files as tabs and jump between them instantly.'},
+    terminal:{title:'Terminal — bottom', body:'A command line built into the window. Start your app, install packages, and use Git without leaving VS Code.'},
+    chat:{title:'AI Chat — right', body:'Your assistant sits beside your code, sees your whole project, and edits files directly from plain-language requests.'}
+  };
+  const wzNodes = document.querySelectorAll('.wz');
+  const wzDescEl = document.getElementById('wz-desc');
+  wzNodes.forEach(node=>{
+    node.addEventListener('click', ()=>{
+      wzNodes.forEach(n=>n.classList.remove('active'));
+      node.classList.add('active');
+      const data = wzDesc[node.dataset.zone];
+      wzDescEl.querySelector('h4').textContent = data.title;
+      wzDescEl.querySelector('p').textContent = data.body;
+    });
+  });
+
+  // stepper
+  const stepButtons = document.querySelectorAll('#stepper-tabs button');
+  const stepPanels = document.querySelectorAll('.step-panel');
+  stepButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      stepButtons.forEach(b=>b.classList.remove('active'));
+      stepPanels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector('[data-panel="'+btn.dataset.step+'"]').classList.add('active');
+    });
+  });
+
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const text = document.getElementById(btn.dataset.copy).textContent;
+      navigator.clipboard.writeText(text).then(()=>{
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(()=> btn.textContent = original, 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
