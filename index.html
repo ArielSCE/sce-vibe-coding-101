@@ -345,6 +345,51 @@
     .hero-text{text-align:left;}
   }
 
+  /* ===== contact ===== */
+  .btn-line{
+    display:inline-flex; align-items:center; gap:.8rem; border:1px solid var(--black);
+    padding:1rem 1.7rem; font-family:var(--font-mono); font-size:.8rem; letter-spacing:.06em;
+    text-transform:uppercase; transition:background .2s ease, color .2s ease; margin-top:1.8rem;
+  }
+  .btn-line:hover{background:var(--black); color:var(--white);}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,10,10,.65); z-index:1100;
+    display:none; align-items:center; justify-content:center; padding:5vw;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--white); width:100%; max-width:440px; padding:2.6rem;
+    position:relative; border:1px solid var(--black);
+  }
+  .modal-close{
+    position:absolute; top:1.1rem; right:1.1rem; font-family:var(--font-mono); font-size:1.2rem;
+    line-height:1; width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); transition:all .2s ease;
+  }
+  .modal-close:hover{background:var(--black); color:var(--white); border-color:var(--black);}
+  .modal-box h3{font-family:var(--font-display); font-weight:800; font-size:1.5rem; margin-bottom:.5rem;}
+  .modal-sub{color:var(--g600); font-size:.9rem; margin-bottom:1.8rem;}
+  .field{display:flex; flex-direction:column; gap:.5rem; margin-bottom:1.5rem;}
+  .field label{font-family:var(--font-mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--g400);}
+  .field input, .field textarea{
+    border:none; border-bottom:1px solid var(--line); background:transparent; font-family:var(--font-body);
+    font-size:1rem; padding:.5rem 0; color:var(--black); resize:none;
+  }
+  .field input:focus, .field textarea:focus{outline:none; border-bottom-color:var(--black);}
+  .hp-field{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
+  .submit-row{display:flex; align-items:center; gap:1.2rem; margin-top:.4rem;}
+  .submit-btn{
+    border:1px solid var(--black); background:var(--black); color:var(--white); padding:.85rem 1.8rem;
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase;
+    transition:opacity .2s ease;
+  }
+  .submit-btn:hover{opacity:.8;}
+  .submit-btn:disabled{opacity:.5; cursor:default;}
+  .form-status{font-family:var(--font-mono); font-size:.78rem; color:var(--g600);}
+  .form-status.ok{color:var(--black); font-weight:700;}
+  .form-status.err{color:var(--black); font-style:italic;}
+
   /* footer */
   footer{border-top:1px solid var(--line); padding:3rem 0;}
   .foot-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;}
@@ -389,6 +434,7 @@
       <li><a href="#about" data-nav>About</a></li>
       <li><a href="#presentation" data-nav>Presentation</a></li>
       <li><a href="#links" data-nav>Relevant Links</a></li>
+      <li><a href="#contact" data-nav>Contact</a></li>
     </ul>
     <button class="burger" id="burger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   </nav>
@@ -784,6 +830,17 @@
   </div>
 </section>
 
+<section id="contact" class="section-pad alt">
+  <div class="wrap">
+    <div class="eyebrow">04 — Contact</div>
+    <div class="sec-head reveal contact-cta" style="margin-bottom:0;">
+      <h2>Got a question?</h2>
+      <p>If something in the deck or the site didn't quite click, send a short message — name, email, and what's on your mind.</p>
+      <button class="btn-line" id="contact-open" type="button">Send a message ✉</button>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap foot-row">
     <span class="mono">Vibe Coding · 101</span>
@@ -791,6 +848,34 @@
     <span class="mono">Made for students learning to build</span>
   </div>
 </footer>
+
+<div class="modal-overlay" id="contact-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="contact-close" type="button" aria-label="Close">×</button>
+    <h3>Send a message</h3>
+    <p class="modal-sub">Fill this in and it goes straight through — no reply-to needed, just leave your email if you'd like one.</p>
+    <form id="contact-form">
+      <input type="checkbox" name="botcheck" class="hp-field" tabindex="-1" autocomplete="off">
+      <input type="hidden" name="subject" value="New message — Vibe Coding 101 site">
+      <div class="field">
+        <label for="cf-name">Name</label>
+        <input id="cf-name" name="name" type="text" required maxlength="100" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="cf-email">Email</label>
+        <input id="cf-email" name="email" type="email" required maxlength="150" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="cf-message">Message</label>
+        <textarea id="cf-message" name="message" rows="4" required maxlength="2000"></textarea>
+      </div>
+      <div class="submit-row">
+        <button class="submit-btn" type="submit" id="contact-submit">Send</button>
+        <span class="form-status" id="contact-status"></span>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
   // progress bar
@@ -805,7 +890,7 @@
 
   // active nav link
   const navLinks = document.querySelectorAll('[data-nav]');
-  const sections = ['about','presentation','links'].map(id => document.getElementById(id));
+  const sections = ['about','presentation','links','contact'].map(id => document.getElementById(id));
   const navObserver = new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
       if(entry.isIntersecting){
@@ -877,6 +962,81 @@
       btn.classList.add('active');
       document.querySelector('[data-panel="'+btn.dataset.step+'"]').classList.add('active');
     });
+  });
+
+  // contact modal
+  const WEB3FORMS_ACCESS_KEY = '5858d903-95a6-40f7-b146-8b0a80bf2383';
+  const contactModal = document.getElementById('contact-modal');
+  const openContactBtns = document.querySelectorAll('#contact-open, [data-contact-trigger]');
+  const contactClose = document.getElementById('contact-close');
+  const contactForm = document.getElementById('contact-form');
+  const contactStatus = document.getElementById('contact-status');
+  const contactSubmit = document.getElementById('contact-submit');
+
+  let contactOpenedAt = 0;
+  function openContact(e){
+    if(e) e.preventDefault();
+    contactModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('cf-name').focus();
+    contactOpenedAt = Date.now();
+  }
+  function closeContact(){
+    contactModal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  openContactBtns.forEach(btn => btn.addEventListener('click', openContact));
+  contactClose.addEventListener('click', closeContact);
+  contactModal.addEventListener('click', (e)=>{ if(e.target === contactModal) closeContact(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && contactModal.classList.contains('open')) closeContact(); });
+
+  // nav "Contact" link should open the modal instead of just scrolling
+  document.querySelector('a[href="#contact"][data-nav]').addEventListener('click', (e)=>{
+    e.preventDefault();
+    document.getElementById('contact').scrollIntoView({behavior:'smooth'});
+  });
+
+  contactForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(contactForm.botcheck.checked) return; // honeypot: real visitors never fill/check a hidden field
+    if(Date.now() - contactOpenedAt < 2000){ // submitted implausibly fast for a human
+      contactStatus.textContent = 'Please try again.';
+      contactStatus.className = 'form-status err';
+      return;
+    }
+    contactSubmit.disabled = true;
+    contactStatus.textContent = 'Sending…';
+    contactStatus.className = 'form-status';
+
+    const payload = {
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: contactForm.subject.value,
+      name: contactForm.name.value,
+      email: contactForm.email.value,
+      message: contactForm.message.value
+    };
+
+    try{
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'Accept':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(data.success){
+        contactStatus.textContent = 'Sent — thank you!';
+        contactStatus.className = 'form-status ok';
+        contactForm.reset();
+        setTimeout(closeContact, 1600);
+      } else {
+        throw new Error(data.message || 'Failed');
+      }
+    } catch(err){
+      contactStatus.textContent = 'Something went wrong — please try again.';
+      contactStatus.className = 'form-status err';
+    } finally {
+      contactSubmit.disabled = false;
+    }
   });
 
   // copy buttons
